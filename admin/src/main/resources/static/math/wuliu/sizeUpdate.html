@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>买手注册</title>
+</head>
+<link rel="stylesheet" href="/js/layui/css/layui.css">
+<script src="/js/layui/layui.all.js"></script>
+<body>
+
+
+<form class="layui-form layui-form-pane" action="" id="goodsAddSubmit">
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>采购信息</legend>
+    </fieldset>
+
+
+    <div id="app">
+
+        <div class="layui-form-item">
+
+            <label class="layui-form-label">数量</label>
+            <div class="layui-input-inlin">
+                <div class="layui-input-inline">
+                    <input name="sizeCount" autocomplete="off"
+                           placeholder="请输入实际销量" class="layui-input">
+                </div>
+            </div>
+
+
+            <label class="layui-form-label">shipmentId</label>
+            <div class="layui-input-inlin">
+                <div class="layui-input-inline">
+                    <input name="shipmentId" autocomplete="off"
+                           placeholder="请输入实际销量" class="layui-input">
+                </div>
+            </div>
+
+        </div>
+
+
+
+    <!-- 提交按钮 -->
+    <div class="layui-form-item" style="margin-top:40px">
+        <div class="layui-input-block" style="text-align: center;">
+            <button type="button" lay-submit="" class="layui-btn" lay-filter="doSubmit" id="submitBtn">
+                <span class="layui-icon layui-icon-add-1"></span>
+                提交
+            </button>
+            <button type="reset" class="layui-btn layui-btn-warm">
+                <span class="layui-icon layui-icon-refresh-1"></span>
+                重置
+            </button>
+        </div>
+    </div>
+    </div>
+</form>
+
+</body>
+<script src="/js/tools.js"></script>
+<script src="js/sizeUpdate.js"></script>
+</html>

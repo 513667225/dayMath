@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.math.modules.saleSum.mapper.SaleSumMapper">
+
+
+
+
+
+
+
+
+    <select id="querySalePage" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select s.sum_id,s.r_date,s.seller_sku,s.asin,s.product_name,s.currency_code,s.order_items,s.volume,s.amount,
+        l.local_sku,se.country,l.seller_sku
+        from sale_sum s , listing l,seller se
+
+
+        <where>
+            s.seller_sku = l.seller_sku
+            and s.seller_id = l.seller_id
+            and s.seller_id = se.sid
+            <if test="sid !=null and sid!=''">
+                and s.seller_id=#{sid}
+            </if>
+            <if test="country !=null and country!=''">
+                and se.country=#{country}
+            </if>
+            <if test="account !=null and account!=''">
+                and l.principal_name=#{account}
+            </if>
+
+            <if test="sku !=null and sku!=''">
+                and l.local_sku=#{sku}
+            </if>
+            <if test="asin !=null and asin!=''">
+                and s.asin=#{asin}
+            </if>
+            <if test="productName !=null and productName!=''">
+                and l.product_name=#{productName}
+            </if>
+
+
+        </where>
+
+
+        limit #{rowIndex},#{limit}
+    </select>
+
+    <select id="querySalePageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+        select  count(0)
+        from sale_sum s , listing l,seller se
+
+
+        <where>
+            s.seller_sku = l.seller_sku
+            and s.seller_id = l.seller_id
+            and s.seller_id = se.sid
+            <if test="sid !=null and sid!=''">
+                and s.seller_id=#{sid}
+            </if>
+            <if test="country !=null and country!=''">
+                and se.country=#{country}
+            </if>
+            <if test="account !=null and account!=''">
+                and l.principal_name=#{account}
+            </if>
+
+            <if test="sku !=null and sku!=''">
+                and l.local_sku=#{sku}
+            </if>
+            <if test="asin !=null and asin!=''">
+                and s.asin=#{asin}
+            </if>
+            <if test="productName !=null and productName!=''">
+                and l.product_name=#{productName}
+            </if>
+
+
+        </where>
+
+    </select>
+
+
+
+
+</mapper>

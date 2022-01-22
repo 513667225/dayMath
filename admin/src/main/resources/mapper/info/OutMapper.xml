@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.math.modules.out.mapper.OutMapper">
+
+    <select id="queryOutByDate" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select sum(IF(actual_sale=0,sale_price,actual_sale)) from sale
+        where  times>=#{begin}  and times &lt;= #{end} and asin  =#{asin} and site =#{site}
+
+    </select>
+
+    <select id="queryInByDate" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select sum(IFNULL(`count`,0)) from `in`  where  times>=#{begin}  and times &lt;= #{end} and asin  =#{asin} and site =#{site}
+    </select>
+
+    <select id="sumAllSale" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select sum(sale_price) from `sale`  where  times>=#{begin}  and times &lt;= #{end} and asin  =#{asin} and site =#{site}
+    </select>
+
+
+
+
+
+    <select id="sumSaleByDate" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select sum(IF(actual_sale=0,sale_price,actual_sale)) from `sale`  where  times>=#{begin}  and times &lt;= #{end} and asin  =#{asin} and site =#{site}
+    </select>
+
+    <select id="sumSaleByOut" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select sum(`sale_val`) from `out`  where  times=#{times}  and asin = #{asin} and country = #{site}
+    </select>
+
+
+</mapper>

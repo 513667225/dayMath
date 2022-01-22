@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<link rel="stylesheet" href="/js/layui/css/layui.css">
+<script src="/js/layui/layui.all.js"></script>
+<body>
+<div class="layui-form-item">
+    <label class="layui-form-label" style="width: 130px">开始时间：</label>
+    <div style="width: 100px" class="layui-input-inline">
+        <input type="text" name="begin" id="begin" placeholder="yyyy-MM-dd" autocomplete="off" readonly
+               class="layui-input ">
+    </div>
+
+
+    <label class="layui-form-label" style="width: 130px">结束时间：</label>
+    <div style="width: 100px" class="layui-input-inline">
+        <input type="text" name="end" id="end" placeholder="yyyy-MM-dd" autocomplete="off" readonly
+               class="layui-input ">
+    </div>
+    <!--    <div style="width: 100px" class="layui-input-inline">-->
+    <button class="layui-btn layui-btn-warm layui-btn-radius" id="sel">搜索</button>
+    <button class="layui-btn layui-btn-radius" id="oldDay">昨日排名</button>
+    <button class="layui-btn layui-btn-radius" id="week">本周排名</button>
+    <button class="layui-btn layui-btn-radius" id="month">本月排名</button>
+    <!--    </div>-->
+</div>
+<div id="main" style="width: 1400px;height:300px;"></div>
+<div id="main1" style="width: 1400px;height:300px;"></div>
+
+<div id="main3" style="width: 1400px;height:300px;">
+
+</div>
+<div style="width: 1400px;height:400px;">
+    <div id="main2" style="width: 1400px;height:300px;"></div>
+    <div id="main4" style="width: 1400px;height:300px;"></div>
+    <div id="main5" style="width: 1400px;height:300px;"></div>
+</div>
+</body>
+<script src="/js/jquery-1.8.3.min.js"></script>
+<script src="/js/echarts.js"></script>
+
+<script>
+    var myChart = echarts.init(document.getElementById('main'));
+    var myChart1 = echarts.init(document.getElementById('main1'));
+    var myChart2 = echarts.init(document.getElementById('main2'));
+    var myChart3 = echarts.init(document.getElementById('main3'));
+    var myChart4 = echarts.init(document.getElementById('main4'));
+    var myChart5 = echarts.init(document.getElementById('main5'));
+
+    function btnClick(btn) {
+        $(".layui-btn-warm").removeClass("layui-btn-warm");
+        btn.addClass("layui-btn-warm");
+    }
+
+    var oldDay = function () {
+
+        var day1 = new Date();
+        day1.setTime(day1.getTime() - 2 * 24 * 60 * 60 * 1000);
+        var s1 = day1.getFullYear() + "-" + (day1.getMonth() + 1) + "-" + day1.getDate();
+        main(s1, s1);
+        main1(s1, s1);
+        main2(s1, s1);
+        main3(s1, s1);
+        main4(s1, s1);
+        btnClick($("#oldDay"))
+        // console.log(s1);
+    }
+    oldDay();
+    $(function () {
+
+        var start = layui.laydate.render({
+            elem: '#begin'
+            , trigger: 'click'
+        });
+
+        var end = layui.laydate.render({
+            elem: '#end', trigger: 'click'
+        });
+        $("#sel").click(function () {
+            let begin = $("#begin").val();
+            let end = $("#end").val();
+
+            main(begin, end);
+            main1(begin, end);
+            main2(begin, end);
+            main3(begin, end);
+            main4(begin, end);
+            btnClick($(this))
+
+        })
+
+
+        $("#oldDay").click(oldDay)
+
+        function formatterDate(date) {
+            var datetime = date.getFullYear()
+                + "-"// "年"
+                + ((date.getMonth() + 1) > 10 ? (date.getMonth() + 1) : "0"
+                    + (date.getMonth() + 1))
+                + "-"// "月"
+                + (date.getDate() < 10 ? "0" + date.getDate() : date
+                    .getDate());
+            return datetime;
+        }
+
+        $("#week").click(function () {
+            var startStop = new Array();
+            //返回date是一周中的某一天
+            var week = new Date();
+            let millisecond = 1000 * 60 * 60 * 24;
+            //减去的天数
+            var minusDay = week.getDay() != 0 ? week.getDay() - 1 : 6;
+            //本周 周一
+            var monday = new Date(week.getTime() - (minusDay * millisecond));
+            //本周 周日
+            var sunday = new Date(monday.getTime() + (6 * millisecond));
+            //添加本周时间
+            //添加本周最后一天时间
+            main(formatterDate(monday), formatterDate(sunday));
+            main1(formatterDate(monday), formatterDate(sunday));
+            main2(formatterDate(monday), formatterDate(sunday));
+            main3(formatterDate(monday), formatterDate(sunday));
+            main4(formatterDate(monday), formatterDate(sunday));
+            btnClick($(this))
+            // return startStop;
+        })
+
+
+        $("#month").click(function () {
+            var startStop = new Array();
+            var week = new Date();
+            let millisecond = 1000 * 60 * 60 * 24;
+            //获得当前月份0-11
+            var currentMonth = week.getMonth();
+            //获得当前年份4位年
+            var currentYear = week.getFullYear();
+            //求出本月第一天
+            var firstDay = new Date(currentYear, currentMonth, 1);
+            //当为12月的时候年份需要加1
+            //月份需要更新为0 也就是下一年的第一个月
+            //否则只是月份增加,以便求的下一月的第一天
+            if (currentMonth == 11) {
+                currentYear++;
+                currentMonth = 0;
+            } else {
+                currentMonth++;
+            }
+            //下月的第一天
+            var nextMonthDayOne = new Date(currentYear, currentMonth, 1);
+            //求出上月的最后一天
+            var lastDay = new Date(nextMonthDayOne.getTime() - millisecond);
+
+            main(formatterDate(firstDay), formatterDate(lastDay));
+            main1(formatterDate(firstDay), formatterDate(lastDay));
+            main2(formatterDate(firstDay), formatterDate(lastDay));
+            main3(formatterDate(firstDay), formatterDate(lastDay));
+            main4(formatterDate(firstDay), formatterDate(lastDay));
+            btnClick($(this))
+            // //返回
+            // return startStop;
+
+        })
+    })
+
+
+    function main(begin, end) {
+        let data = {};
+        if (begin && end) {
+            data.begin = begin;
+            data.end = end;
+        }
+        $.ajax({
+            url: '/sale/censusRate',
+            dataType: 'json',
+            data: data,
+            type: 'get',
+            success: function (data) {
+                let result = data.data;
+                let legendArr = result.keys;
+                let xAxisArr = result.values;
+
+                option = {
+                    title: {
+                        text: '达成率排行'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            console.log(params);
+                            var tar = params[1];
+
+                            return params.data + '%';
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: legendArr
+
+                    },
+                    yAxis: {
+                        type: 'value'
+                        ,
+                        axisLabel: {
+                            formatter: '{value}%'
+                        }
+                    },
+                    series: [
+                        {
+                            data: xAxisArr,
+                            type: 'bar',
+                            barWidth: 20,
+                            itemStyle: {
+                                color: '#009ba9'
+                            }
+                            ,
+                            label: {
+                                show: true,
+                                position: 'top'
+                            }
+                        }
+                    ]
+                };
+                myChart.setOption(option);
+            }
+        })
+    }
+
+
+    function main1(begin, end) {
+        let data = {};
+        if (begin && end) {
+            data.begin = begin;
+            data.end = end;
+        }
+        $.ajax({
+            url: '/sale/censusAmount',
+            dataType: 'json',
+            data: data,
+            type: 'get',
+            success: function (data) {
+                let result = data.data;
+                let legendArr = result.keys;
+                let xAxisArr = result.values;
+                let option1 = {
+                    title: {
+                        text: '销售额榜'
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: legendArr
+
+                    },
+                    yAxis: {
+                        type: 'value'
+                        ,
+                        axisLabel: {
+                            formatter: '{value}$'
+                        }
+                    },
+                    series: [
+                        {
+                            data: xAxisArr,
+                            type: 'bar',
+                            barWidth: 20,
+                            itemStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    {offset: 0, color: '#f6d983'},
+                                    {offset: 0.5, color: '#f0ba18'},
+                                    {offset: 1, color: '#f08818'}
+                                ])
+                            }
+                            ,
+                            label: {
+                                show: true,
+                                position: 'top'
+                            }
+                        }
+                    ]
+                };
+                myChart1.setOption(option1);
+            }
+        })
+    }
+
+
+    function main2(begin, end) {
+        let data = {};
+        if (begin && end) {
+            data.begin = begin;
+            data.end = end;
+        }
+        $.ajax({
+            url: '/sale/censusByProduct',
+            dataType: 'json',
+            data: data,
+            type: 'get',
+            success: function (data) {
+                let result = data.data;
+                let legendArr = result.keys;
+                let xAxisArr = result.values;
+                let option2 = {
+                    title: {
+                        text: '产品销量TOP20'
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: legendArr
+                        ,
+                        axisLabel: {
+                            interval: 0,
+                            rotate: 20
+                        }
+                    },
+                    yAxis: {
+                        type: 'value'
+                        ,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    },
+                    series: [
+                        {
+                            data: xAxisArr,
+                            type: 'bar',
+                            barWidth: 20,
+                            itemStyle: {
+                                color: '#06a900'
+                            }
+                            ,
+                            label: {
+                                show: true,
+                                position: 'top'
+                            }
+                        }
+                    ]
+                };
+                myChart2.setOption(option2);
+            }
+        })
+    }
+
+
+    function main3(begin, end) {
+        let data = {};
+        if (begin && end) {
+            data.begin = begin;
+            data.end = end;
+        }
+        $.ajax({
+            url: '/sale/censusByCount',
+            dataType: 'json',
+            data: data,
+            type: 'get',
+            success: function (data) {
+                let result = data.data;
+                let legendArr = result.keys;
+                let xAxisArr = result.values;
+                let option3 = {
+                    title: {
+                        text: '销售量榜'
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: legendArr
+                        ,
+                        axisLabel: {
+                            interval: 0,
+                            rotate: 20
+                        }
+                    },
+                    yAxis: {
+                        type: 'value'
+                        ,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    },
+                    series: [
+                        {
+                            data: xAxisArr,
+                            type: 'bar',
+                            barWidth: 20,
+                            itemStyle: {
+                                color: '#8a00a9'
+                            }
+                            ,
+                            label: {
+                                show: true,
+                                position: 'top'
+                            }
+                        }
+                    ]
+                };
+                myChart3.setOption(option3);
+            }
+        })
+    }
+
+
+    function main4(begin, end) {
+        let data = {};
+        if (begin && end) {
+            data.begin = begin;
+            data.end = end;
+        }
+        $.ajax({
+            url: '/sale/censusByType',
+            dataType: 'json',
+            data: data,
+            type: 'get',
+            success: function (data) {
+                let result = data.data;
+                let legendArr = result.values;
+                let xAxisArr = result.values1;
+                let option4 = {
+                    title: {
+                        text: '销售额构成分析',
+                        left: 'center'
+                    },
+
+                    label: {
+                        formatter:"{b}:{c}%"
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left'
+                    },
+                    series: [
+                        {
+                            name: '销售额',
+                            type: 'pie',
+                            radius: '50%',
+                            data: legendArr,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+
+                            }
+                        }
+                    ]
+                };
+
+                let option5 = {
+                    title: {
+                        text: '销售量构成分析',
+                        left: 'center'
+                    },
+
+                    label: {
+                        formatter:"{b}:{c}%"
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left'
+                    },
+                    series: [
+                        {
+                            name: '销售量',
+                            type: 'pie',
+                            radius: '50%',
+                            data: xAxisArr,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            },
+                            radius: ['40%', '70%']
+                        }
+                    ]
+                };
+                myChart4.setOption(option4);
+                myChart5.setOption(option5);
+            }
+        })
+    }
+
+
+</script>
+</html>

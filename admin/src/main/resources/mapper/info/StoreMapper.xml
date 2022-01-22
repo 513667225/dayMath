@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.math.modules.fbaStore.mapper.FbaStoreMapper">
+
+
+
+
+
+
+
+
+    <select id="queryStorePage" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select fs.fbain_id,fs.wname,fs.product_image,fs.asin,fs.msku,fs.fnsku,fs.product_name,fs.sku,fs.afn_fulfillable_quantity,fs.reserved_fc_transfers,fs.reserved_fc_processing
+        ,l.principal_name
+        from fba_store fs , listing l
+
+
+        <where>
+            fs.asin = l.asin
+            and fs.seller_id = l.seller_id
+            <if test="account !=null and account!=''">
+                and l.principal_name=#{account}
+            </if>
+            <if test="wname !=null and wname!=''">
+                and fs.wname=#{wname}
+            </if>
+            <if test="productName !=null and productName!='' and productName!='null'">
+                and fs.product_name=#{productName}
+            </if>
+
+            <if test="productName =='null' ">
+                and fs.product_name is null
+            </if>
+
+            <if test="asin !=null and asin !='' ">
+                and fs.asin=#{asin}
+            </if>
+            <if test="fnsku !=null and fnsku !='' ">
+                and fs.fnsku =#{fnsku}
+            </if>
+        </where>
+
+
+        limit #{rowIndex},#{limit}
+    </select>
+
+    <select id="queryStorePageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+        select  count(0)
+        from fba_store fs , listing l
+
+
+        <where>
+            fs.asin = l.asin
+            and fs.seller_id = l.seller_id
+            <if test="account !=null and account!=''">
+                and l.principal_name=#{account}
+            </if>
+            <if test="wname !=null and wname!=''">
+                and fs.wname=#{wname}
+            </if>
+            <if test="productName !=null and productName!='' and productName!='null'">
+                and fs.product_name=#{productName}
+            </if>
+
+            <if test="productName =='null' ">
+                and fs.product_name is null
+            </if>
+
+            <if test="asin !=null and asin !='' ">
+                and fs.asin=#{asin}
+            </if>
+            <if test="fnsku !=null and fnsku !='' ">
+                and fs.fnsku =#{fnsku}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getAllName" resultType="java.lang.String" parameterType="java.util.Map">
+
+        select distinct product_name   from fba_store
+
+    </select>
+
+</mapper>

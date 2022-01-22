@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.math.modules.fbaProduct.mapper.FbaProductMapper">
+
+
+    <select id="queryProductPage" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select
+        DISTINCT fp.fba_product_id,fp.is_closed,fp.shipment_id,fp.seller,fp.shipment_status,fp.shipment_name,fp.gmt_create,fp.destination_fulfillment_center_id,fp.seller_id,
+        s.country,fp.gmt_modified ,a.times
+        from fba_product fp
+        left join arrival a on fp.shipment_id = a.shipment_id
+        , seller s
+        <where>
+            fp.seller_id = s.sid
+
+            <if test="id !=null and id!=''">
+                and fp.fba_product_id=#{id}
+            </if>
+            <if test="sid !=null and sid!=''">
+                and s.sid=#{sid}
+            </if>
+            <if test="country !=null and country!=''">
+                and s.country=#{country}
+            </if>
+            <if test="isClosed !=null ">
+                and fp.is_closed=#{isClosed}
+            </if>
+            <if test="gmtCreate !=null ">
+                and fp.gmt_create=#{gmtCreate}
+            </if>
+            <if test="begin !=null ">
+                and fp.gmt_modified >=#{begin}
+            </if>
+
+            <if test="end !=null ">
+                and fp.gmt_modified &lt;=#{end}
+            </if>
+
+
+            <if test="shipmentId !=null and shipmentId !='' ">
+                and fp.shipment_id=#{shipmentId}
+            </if>
+            <!--                        and fp.seller_id = l.seller_id
+           and fp.fnsku = l.fnsku
+             <if test="fnsku !=null and fnsku !='' ">-->
+            <!--                and fp.fnsku =#{fnsku}-->
+            <!--            </if>-->
+            <!--            <if test="sku !=null and sku !='' ">-->
+            <!--                and fp.sku =#{sku}-->
+            <!--            </if>-->
+            <!--            <if test="productName !=null and productName !='' ">-->
+            <!--                and l.item_name =#{productName}-->
+            <!--            </if>-->
+            <if test="idList !=null  ">
+                and fba_product_id in
+                <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+
+
+        limit #{rowIndex},#{limit}
+    </select>
+
+    <select id="queryProductPageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+    select count(0) from (
+        select
+        DISTINCT fp.fba_product_id,fp.is_closed,fp.shipment_id,fp.seller,fp.shipment_status,fp.shipment_name,fp.gmt_create,fp.destination_fulfillment_center_id,fp.seller_id,
+        s.country,fp.gmt_modified ,a.times
+        from fba_product fp
+        left join arrival a on fp.shipment_id = a.shipment_id
+        , seller s
+        <where>
+            fp.seller_id = s.sid
+
+
+            <if test="id !=null and id!=''">
+                and fp.fba_product_id=#{id}
+            </if>
+            <if test="sid !=null and sid!=''">
+                and s.sid=#{sid}
+            </if>
+            <if test="country !=null and country!=''">
+                and s.country=#{country}
+            </if>
+            <if test="isClosed !=null ">
+                and fp.is_closed=#{isClosed}
+            </if>
+            <if test="gmtCreate !=null ">
+                and fp.gmt_create=#{gmtCreate}
+            </if>
+            <if test="begin !=null ">
+                and fp.gmt_modified >=#{begin}
+            </if>
+
+            <if test="end !=null ">
+                and fp.gmt_modified &lt;=#{end}
+            </if>
+
+
+            <if test="shipmentId !=null and shipmentId !='' ">
+                and fp.shipment_id=#{shipmentId}
+            </if>
+            <!--                        and fp.seller_id = l.seller_id
+           and fp.fnsku = l.fnsku
+             <if test="fnsku !=null and fnsku !='' ">-->
+            <!--                and fp.fnsku =#{fnsku}-->
+            <!--            </if>-->
+            <!--            <if test="sku !=null and sku !='' ">-->
+            <!--                and fp.sku =#{sku}-->
+            <!--            </if>-->
+            <!--            <if test="productName !=null and productName !='' ">-->
+            <!--                and l.item_name =#{productName}-->
+            <!--            </if>-->
+            <if test="idList !=null  ">
+                and fba_product_id in
+                <foreach item="item" index="index" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        ) s
+    </select>
+
+    <select id="queryProductItem" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+        select
+        distinct fba_product_id
+        from item i ,listing l,seller s
+
+
+        <where>
+
+            and i.seller_id = l.seller_id
+            and i.seller_id = s.sid
+            and i.fnsku = l.fnsku
+            <if test="fnsku !=null and fnsku !='' ">
+                and i.fnsku =#{fnsku}
+            </if>
+            <if test="sku !=null and sku !='' ">
+                and i.sku =#{sku}
+            </if>
+            <if test="asin !=null and asin !='' ">
+                and l.asin =#{asin}
+            </if>
+            <if test="productName !=null and productName !='' ">
+                and l.item_name =#{productName}
+            </if>
+            <if test="site !=null and site !='' ">
+                and s.country =#{site}
+            </if>
+
+
+        </where>
+
+    </select>
+
+    <select id="queryProductItemInfo" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select
+        i.item_id,i.msku,i.fnsku,i.init_quantity_shipped,i.quantity_shipped_local,i.quantity_received,i.fba_product_id,i.seller_id,
+        l.asin,s.name
+        from item i ,listing l,seller s
+
+
+        <where>
+
+            and i.seller_id = l.seller_id
+            and i.seller_id = s.sid
+            and i.fnsku = l.fnsku
+            <if test="fba_product_id !=null and fba_product_id !='' ">
+                and i.fba_product_id =#{fba_product_id}
+            </if>
+
+        </where>
+
+    </select>
+
+</mapper>

@@ -1,0 +1,83 @@
+server:
+  port: 3900
+ribbon:
+  #指的是建立连接所用的时间,适用于网络状况正常的情况下,两端连接所用的时间
+  ReadTimeout: 500000
+  #指的是建立连接后从服务器读取到可用资源所用的时间
+  ConnectTimeout: 500000
+spring:
+  application:
+    name: SERVER-TABLE
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 127.0.0.1:8848
+  http:
+    encoding:
+      charset: utf-8
+      enabled: true
+      force: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://localhost:3306/math?useSSL=false&useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&serverTimezone=UTC
+    username: root
+    password: root
+#    password: wonderful2021!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 1000000 # 250 30000 获取连接的超时时间
+      idle-timeout: 300000 # 10000 600000 空闲时间
+      max-lifetime: 600000 # 30000 1800000 最大生存时间，连接在使用时不会生效
+      minimum-idle: 10 # 高并发下建议与maximum-pool-size一致
+      maximum-pool-size: 25 # 10 连接池大小
+      data-source-properties:
+        cachePrepStmts: true # 开启sql语句缓存
+        prepStmtCacheSize: 250 # 缓存多少条sql语句
+        prepStmtCacheSqlLimit: 512 # 缓存sql的最大长度
+        useServerPrepStmts: true # 如果可以的话，使用缓存的sql语句
+        useLocalSessionState: true # 使用本地配置
+        rewriteBatchedStatements: true # 优化update count
+        cacheResultSetMetadata: true # 是否缓存ResultSetMetaData
+        cacheServerConfiguration: true # 缓存VARIABLES，COLLATION
+        elideSetAutoCommits: true # 不进行 set autocommit
+        maintainTimeStats: true # 更详细的错误信息，会多2次System.getCurrentTimeMillis()调用
+  redis:
+    host: 127.0.0.1
+    port: 6379
+#    password: wonderful2021!
+    database: 0
+    jedis:
+      pool:
+        max-active: 1000
+        max-idle: 100
+        max-wait: -1ms
+        min-idle: 10
+    timeout: 30000ms
+#  rabbitmq:
+#    host: 121.196.191.180
+#    port: 5672
+#    username: admin
+#    password: Yuanpingou_2020
+#    virtual-host: /
+#    publisher-confirm-type: correlated # 开启发送确认
+#    publisher-returns: true       # 开启发送失败退回
+#    listener:                     # 开启ACK
+#      direct:
+#        acknowledge-mode: manual
+#      simple:
+#        acknowledge-mode: manual
+
+
+#mybatis-plus:
+#  mapper-locations: classpath*:mapper/**/*.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+logging:
+  level:
+    com.yph.modules.user.mapper: debug

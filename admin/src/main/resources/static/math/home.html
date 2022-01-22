@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>采购系统
+    </title>
+    <link rel="stylesheet" href="/js/layui/css/layui.css">
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">采购系统
+        </div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <!--<ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>-->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    <name id = "username"></name>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a  id="exit" >Login Out</a></dd>
+                    <dd level = "1" ><a  id="edit" >Change Password</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul id="menuBody" class="layui-nav layui-nav-tree" lay-filter="test" id="memus">
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 动态选项卡 内容主体区域-->
+        <div id="tabzu" class="layui-tab layui-tab-card layui-tab-brief" lay-filter="tabDemo" lay-allowclose="true">
+            <ul class="layui-tab-title"></ul>
+            <div class="layui-tab-content"></div>
+<!--            <iframe src="text.html" width="2300px" height="1000px"></iframe>-->
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+<!--        © layui.com - 底部固定区域-->
+    </div>
+</div>
+<script src="/js/jquery-1.7.2.min.js"></script>
+<script src="/js/layui/layui.all.js"></script>
+<script src="/js/tools.js"></script>
+<script>
+
+    $("#username").html(window.localStorage.username);
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var $ = layui.jquery;
+        var element = layui.element
+        element.on('tab(tabDemo)', function(data){
+            let str = $(data.elem.context).attr("lay-id");
+            $("#"+str).attr('src', $("#"+str).attr('src'));
+        });
+
+        $.ajax({
+            url: "/menu/getMenu",
+            type: "get",
+            dataType: "json",
+            success: function (data) {
+                var menuHtml = "";
+                $.each(data.data, function () {
+                    var _data = this;
+                    if (_data.children != null) {
+                        menuHtml += "<li class='layui-nav-item layui-nav-itemed'><a  href='javascript:;'>" + _data.name + "</a><dl class='layui-nav-child'>";
+                        $.each(_data.children, function () {
+                            menuHtml += "<dd><a onclick='addTab(\"" + this.name + "\",\"" + this.id + "\",\"" + this.href + "\")' href='javascript:;' data-url='"+this.href+"' data-id='"+this.id+"' data-title='"+this.name+"''>" + this.name + "</a></dd>";
+                        })
+                        menuHtml += "</dl></li>"
+                    } else {
+                        menuHtml += "<li class='layui-nav-it+" +
+                            "em'><a href='javascript:;'>" + _data.name + "</a></li>";
+                    }
+                })
+                console.log(menuHtml)
+                $("#menuBody").html(menuHtml);
+                element.render("nav");
+            }
+        });
+    });
+
+
+    $("#exit").click(function () {
+        $.ajax({
+            url: '/user/exit',
+            dataType: 'json',
+            type: 'get',
+            success: function (data) {
+                if (data.code ===0){
+                    // layer.msg("已安全退出")
+                    location.href = 'adminLogin.html';
+                }else {
+                    layer.msg(data.msg);
+                }
+            }
+        })
+    });
+
+
+
+    $("#edit").click(function () {
+        var index = layer.open({
+            type: 2,
+            title: 'Edit Information',
+            area: ['1000px', '800px'],
+            shadeClose: true,
+            content: "buyer/buyerUpdate.html"
+        });
+    });
+
+    var x = 1;
+    
+    /*默认主页*/
+    function initHome() {
+        $.ajax({
+            url: '/menu/getHomeUrl',
+            type: 'get',
+            dataType: 'json',
+            success: function (suc) {
+                let name = suc.name;
+                if(layui.jquery(".layui-tab-title li[lay-id='home']").length === 0) {
+                    var tabheight = layui.jquery(window).height() - 95;
+                    contentTxt = '<iframe id="'+name+'" src="' + suc.data + '"  width="100%" height="' + (tabheight) + 'PX"></iframe>';
+                    //新增一个Tab项
+                    layui.element.tabAdd('tabDemo', {
+                        title: name,
+                        content: contentTxt,
+                        id: name
+                    })
+                    //切换刷新
+                    layui.element.tabChange('tabDemo', name)
+                }
+            }
+        })
+
+    }
+    //
+    // initHome();
+
+    /*触发动态选项卡事件*/
+    function addTab(name, id, href) {
+        console.log(name)
+        if(layui.jquery(".layui-tab-title li[lay-id='" + name + "']").length > 0) {
+            //选项卡已经存在
+            $("#"+name).attr('src', $("#"+name).attr('src'));
+            layui.element.tabChange('tabDemo', name);
+        } else {
+            //动态控制iframe高度
+            var tabheight = layui.jquery(window).height() - 60;
+            contentTxt = '<iframe id="'+name+'" src="' + href + '"  width="100%"  height="' + (tabheight)  + 'PX"  ></iframe>';
+            //新增一个Tab项
+            layui.element.tabAdd('tabDemo', {
+                title: name,
+                content: contentTxt,
+                id: name
+            })
+            //切换刷新
+            layui.element.tabChange('tabDemo', name)
+            /*layer.msg('新增-' + name)*/
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

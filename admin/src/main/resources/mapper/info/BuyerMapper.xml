@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.math.modules.sale.mapper.SaleMapper">
+
+    <select id="queryAbsSale" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select a.*,IFNULL(b.`count`,0) `count` from (select avg(s.sale_price) salePrice,count(s.times)
+        saleCount,s.asin,s.site,product_name productName,o.now_count nowCount,s.user
+        ,CONVERT (( o.now_count /(avg( s.sale_price ) )) , DECIMAL ( 10, 2 )) okDay
+        from sale s,`now` o
+        where
+        s.times>=now() and s.times&lt;=(DATE_add(CURDATE(), INTERVAL 30 DAY) )
+        and s.asin=o.asin and s.site=o.site
+        <if test="asin!=null and asin!=''">
+            and s.asin = #{asin}
+            and s.site = #{site}
+        </if>
+        group by s.asin,s.site
+        ) a left join
+
+        (select asin,site,sum(`count`) `count` from `in` where add_sign=0
+        <if test="asin!=null and asin!=''">
+            and asin = #{asin}
+            and site = #{site}
+        </if>
+        group by asin,site) b on a.asin =b.asin and a.site = b.site
+        order by okDay
+        limit #{rowIndex},#{limit}
+    </select>
+
+    <select id="queryAbsSaleCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+        select count(0) from
+        ( select a.*,IFNULL(b.count,0) from (select avg(s.sale_price) salePrice,count(s.times)
+        saleCount,s.asin,s.site,product_name productName,o.now_count nowCount,s.user
+        ,CONVERT (( o.now_count /(avg( s.sale_price ) )) , DECIMAL ( 10, 2 )) okDay
+        from sale s,`now` o
+        where
+        s.times>=now() and s.times&lt;=(DATE_add(CURDATE(), INTERVAL 30 DAY) )
+        and s.asin=o.asin and s.site=o.site
+        <if test="asin!=null and asin!=''">
+            and s.asin = #{asin}
+            and s.site = #{site}
+        </if>
+        group by s.asin,s.site
+        order by okDay) a left join
+        (select asin,site,sum(`count`) `count` from `in` where add_sign=0
+        <if test="asin!=null and asin!=''">
+            and asin = #{asin}
+            and site = #{site}
+        </if>
+        group by asin,site) b on a.asin =b.asin and a.site = b.site
+        ) a
+
+    </select>
+
+
+    <select id="querySumSale" resultType="java.util.Map" parameterType="java.util.Map">
+
+
+        select sum(s.sale_price) salePrice,sum(actual_sale) actualSale,CONCAT(CONVERT (( (SUM( actual_sale ) / SUM(
+        s.sale_price ))
+        *100) , DECIMAL ( 10, 2 )), "%" ) rate ,s.user `user` from sale s
+        <where>
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="begin !=null and begin!=''">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null and end!=''">
+                and s.times&lt;=#{end}
+            </if>
+        </where>
+        group by s.user
+        limit #{rowIndex},#{limit}
+    </select>
+
+
+    <select id="querySumSaleCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+        select count(0) from (
+
+        select s.user from sale s
+        <where>
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="begin !=null and begin!=''">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null and end!=''">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+        group by s.user
+        ) a
+    </select>
+
+
+    <select id="querySumSaleByAsin" resultType="java.util.Map" parameterType="java.util.Map">
+
+
+        select s.asin asin,sum(s.sale_price) salePrice,sum(actual_sale) actualSale,CONCAT(CONVERT (( (SUM( actual_sale )
+        / SUM( s.sale_price ))
+        *100), DECIMAL ( 10, 2 )), "%" ) rate,s.user `user` from sale s
+        <where>
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="begin !=null and begin!=''">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null and end!=''">
+                and s.times&lt;=#{end}
+            </if>
+        </where>
+        group by s.user,s.asin
+        limit #{rowIndex},#{limit}
+    </select>
+
+
+    <select id="querySumSaleCountByAsin" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+        select count(0) from (
+
+        select s.user from sale s
+        <where>
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="begin !=null and begin!=''">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null and end!=''">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+        group by s.user,s.asin
+        ) a
+    </select>
+
+
+    <select id="querySalePage" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select s.sale_id,s.asin,s.product_name,s.site,s.user,s.times,s.sale_price,s.actual_sale,s.in_json
+
+        from sale s
+
+        <where>
+
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="site !=null and site!=''">
+                and s.site=#{site}
+            </if>
+            <if test="asin !=null and asin!=''">
+                and s.asin=#{asin}
+            </if>
+
+            <if test="begin !=null ">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null ">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+        order by s.times asc
+
+        limit #{rowIndex},#{limit}
+
+
+    </select>
+
+
+    <select id="querySalePageCount" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select count(0) count,sum( s.sale_price) sale_price,sum(s.actual_sale) actual_sale from sale s
+
+        <where>
+
+            <if test="user !=null and user!=''">
+                and s.user=#{user}
+            </if>
+            <if test="site !=null and site!=''">
+                and s.site=#{site}
+            </if>
+            <if test="asin !=null and asin!=''">
+                and s.asin=#{asin}
+            </if>
+
+            <if test="begin !=null ">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null ">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="censusByRate" resultType="java.util.Map" parameterType="java.util.Map">
+
+    select sum( s.sale_price) sale_price,sum(s.actual_sale) actual_sale,s.user from sale s
+        <where>
+        <if test="begin !=null ">
+            and s.times>=#{begin}
+        </if>
+        <if test="end !=null ">
+            and s.times &lt;=#{end}
+        </if>
+        </where>
+        GROUP BY s.user
+        order by (sum(s.actual_sale)/sum( s.sale_price)) desc
+    </select>
+
+    <select id="censusByAmount" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select sum( s.amount) amount ,s.user  from sale s
+        <where>
+            <if test="begin !=null ">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null ">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+        GROUP BY s.user
+        order by sum( s.amount) desc
+    </select>
+
+
+    <select id="censusByCount" resultType="java.util.Map" parameterType="java.util.Map">
+
+        select sum( s.actual_sale) actualSale ,s.user  from sale s
+        <where>
+            <if test="begin !=null ">
+                and s.times>=#{begin}
+            </if>
+            <if test="end !=null ">
+                and s.times &lt;=#{end}
+            </if>
+        </where>
+        GROUP BY s.user
+        order by sum( s.amount) desc
+    </select>
+
+    <select id="censusByProduct" resultType="Map" parameterType="Map">
+
+        select  sum(s.volume) volume ,l.local_name from sale_sum s,listing l
+
+        <where>
+        and s.seller_id = l.seller_id
+            and s.seller_sku = l.seller_sku
+            and l.is_delete=0
+            <if test="begin !=null ">
+                and s.r_date>=#{begin}
+            </if>
+            <if test="end !=null ">
+                and s.r_date &lt;=#{end}
+            </if>
+        </where>
+        GROUP BY s.asin ORDER BY sum(s.volume) desc
+        limit 0,20
+    </select>
+
+
+
+    <select id="censusByType" resultType="Map" parameterType="Map">
+
+            select  sum(amount) amount,sum(volume) volume, l.type from sale_sum s ,listing l
+    where s.seller_id = l.seller_id and s.seller_sku = l.seller_sku and l.is_delete=0
+
+        <if test="begin !=null ">
+            and s.r_date>=#{begin}
+        </if>
+        <if test="end !=null ">
+            and s.r_date &lt;=#{end}
+        </if>
+      group by l.type
+
+    </select>
+
+    <select id="censusByTypeSum" resultType="Map" parameterType="Map">
+
+        select  sum(amount) amount,sum(volume) volume from sale_sum s ,listing l
+        where s.seller_id = l.seller_id and s.seller_sku = l.seller_sku and l.is_delete=0
+
+        <if test="begin !=null ">
+            and s.r_date>=#{begin}
+        </if>
+        <if test="end !=null ">
+            and s.r_date &lt;=#{end}
+        </if>
+
+    </select>
+
+</mapper>
